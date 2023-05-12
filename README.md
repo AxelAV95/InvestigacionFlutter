@@ -1,2 +1,9 @@
 # InvestigacionFlutter
-Investigación vinculada al curso de diseño y programación de plataformas móviles
+
+
+- Documentación general y manual
+- UML
+- ER y MR
+- Arquitectura de capas para uso de Webservice y aplicación móvil
+- UI/Front
+- Backend
