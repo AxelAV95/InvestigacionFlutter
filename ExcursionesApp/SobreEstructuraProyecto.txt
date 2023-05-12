@@ -1,0 +1,2 @@
+Sobre estructura del proyecto por medio
+de capas: data, domain, view, business
