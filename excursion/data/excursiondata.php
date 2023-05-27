@@ -82,8 +82,9 @@ class ExcursionData extends Database{
             $stm ->bindParam(1,$id,PDO::PARAM_INT);
             $stm->execute();
             $row = $stm->fetch(PDO::FETCH_ASSOC);
-            $resultado = $row['eliminado'] ?? 4; //4 significa que no devolvió ninguna fila
+           $resultado = $row['eliminado'] ?? 4; //4 significa que no devolvió ninguna fila
             Database::desconectar();
+     
         }catch(PDOException $e) {      
             error_log("Error al eliminar: " . $e->getMessage());              
             $resultado = 2;
@@ -145,7 +146,8 @@ class ExcursionData extends Database{
 ?>
 
 <?php
-
+  //  $data = new ExcursionData();
+  // $res = $data->eliminarExcursion(21);
     /*$data = new ExcursionData();
     $excursion = new Excursion();
             $excursion->setDescripcion("dd");
