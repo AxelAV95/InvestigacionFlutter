@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
+import '../view/update_excursion_page.dart';
 import '../domain/excursion.dart';
-
 
 class VerExcursionesPage extends StatelessWidget {
   const VerExcursionesPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
-     // Retrieve the Excursion object passed from the previous screen
-    final Excursion excursionDetalles = ModalRoute.of(context)!.settings.arguments as Excursion;
-   // print(excursion.descripcion);
+    final Excursion excursionDetalles =
+        ModalRoute.of(context)!.settings.arguments as Excursion;
     // Datos de ejemplo para las excursiones
     List<Excursion> excursiones = [
       Excursion(
-        id : 0,
+        id: 0,
         descripcion: 'Excursión 1',
         fecha: DateTime.now(),
         precio: 100,
@@ -45,7 +43,8 @@ class VerExcursionesPage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final excursion = excursionDetalles;
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                   child: Card(
                     child: ListTile(
                       title: Text(
@@ -88,7 +87,19 @@ class VerExcursionesPage extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  // Acción para el botón "Actualizar"
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ActualizarExcursionView(excursion: excursionDetalles),
+                    ),
+                  ).then((excursionActualizada) {
+                    if (excursionActualizada != null) {
+                      // Aquí puedes realizar acciones adicionales después de actualizar la excursión
+                      // Por ejemplo, puedes actualizar la lista de excursiones o mostrar un mensaje de éxito.
+                      print('Excursión actualizada: ${excursionActualizada.descripcion}');
+                    }
+                  });
                 },
                 child: Text('Actualizar'),
               ),
@@ -107,3 +118,4 @@ class VerExcursionesPage extends StatelessWidget {
     );
   }
 }
+
