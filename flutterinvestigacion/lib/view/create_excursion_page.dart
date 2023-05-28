@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:intl/intl.dart';
+import '../services/api_service.dart';
 
 class CreateExcursionPage extends StatefulWidget {
   const CreateExcursionPage({Key? key}) : super(key: key);
@@ -11,18 +12,35 @@ class CreateExcursionPage extends StatefulWidget {
 class _CreateExcursionPageState extends State<CreateExcursionPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // ignore: unused_field
-  String? _descripcion;
-  // ignore: unused_field
+  final TextEditingController _descripcionController = TextEditingController();
+  final TextEditingController _precioController = TextEditingController();
+  final TextEditingController _lugarController = TextEditingController();
+  final TextEditingController _cantidadController = TextEditingController();
+
   DateTime? _fecha;
-  // ignore: unused_field
-  double? _precio;
-  // ignore: unused_field
   bool _estado = true;
-  // ignore: unused_field
-  String? _lugar;
-  // ignore: unused_field
-  int? _cantidad;
+
+  final ApiService _apiService = ApiService();
+
+  @override
+  void dispose() {
+    _descripcionController.dispose();
+    _precioController.dispose();
+    _lugarController.dispose();
+    _cantidadController.dispose();
+    super.dispose();
+  }
+
+  void _limpiarCampos() {
+    _descripcionController.clear();
+    _precioController.clear();
+    _lugarController.clear();
+    _cantidadController.clear();
+    setState(() {
+      _fecha = null;
+      _estado = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +59,17 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  // Handle form submission
+                  _formKey.currentState!.save();
+                  _apiService.insertarExcursion(
+                    context,
+                    _descripcionController.text,
+                    _fecha!,
+                    double.parse(_precioController.text),
+                    _estado,
+                    _lugarController.text,
+                    int.parse(_cantidadController.text),
+                  );
+                  _limpiarCampos();
                 }
               },
               child: Text('Agregar'),
@@ -64,6 +92,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextFormField(
+                    controller: _descripcionController,
                     decoration: InputDecoration(labelText: 'Descripción'),
                     keyboardType: TextInputType.text,
                     validator: (value) {
@@ -75,26 +104,31 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                       }
                       return null;
                     },
-                    onSaved: (value) {
-                      _descripcion = value;
-                    },
                   ),
                   SizedBox(height: 16),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Fecha'),
-                    keyboardType: TextInputType.datetime,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, ingresa una fecha válida';
+                  ElevatedButton(
+                    onPressed: () async {
+                      final selectedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (selectedDate != null) {
+                        setState(() {
+                          _fecha = selectedDate;
+                        });
                       }
-                      return null;
                     },
-                    onSaved: (value) {
-                      // Parse and save the DateTime value
-                    },
+                    child: Text(
+                      _fecha != null
+                          ? 'Fecha: ${_fecha!.toString().substring(0, 10)}'
+                          : 'Seleccionar fecha',
+                    ),
                   ),
                   SizedBox(height: 16),
                   TextFormField(
+                    controller: _precioController,
                     decoration: InputDecoration(labelText: 'Precio'),
                     keyboardType: TextInputType.number,
                     validator: (value) {
@@ -105,9 +139,6 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                         return 'Por favor, ingresa un número válido';
                       }
                       return null;
-                    },
-                    onSaved: (value) {
-                      _precio = double.tryParse(value!);
                     },
                   ),
                   SizedBox(height: 16),
@@ -126,6 +157,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                   ),
                   SizedBox(height: 16),
                   TextFormField(
+                    controller: _lugarController,
                     decoration: InputDecoration(labelText: 'Lugar'),
                     keyboardType: TextInputType.text,
                     validator: (value) {
@@ -137,12 +169,10 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                       }
                       return null;
                     },
-                    onSaved: (value) {
-                      _lugar = value;
-                    },
                   ),
                   SizedBox(height: 16),
                   TextFormField(
+                    controller: _cantidadController,
                     decoration: InputDecoration(labelText: 'Cantidad'),
                     keyboardType: TextInputType.number,
                     validator: (value) {
@@ -154,9 +184,6 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                       }
                       return null;
                     },
-                    onSaved: (value) {
-                      _cantidad = int.tryParse(value!);
-                    },
                   ),
                 ],
               ),
@@ -166,7 +193,8 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
       ),
     );
   }
- bool _containsNumeric(String value) {
+
+  bool _containsNumeric(String value) {
     final numericRegex = RegExp(r'^-?(([0-9]*)|(([0-9]*)\.([0-9]*)))$');
     return numericRegex.hasMatch(value);
   }

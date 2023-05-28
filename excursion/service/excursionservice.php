@@ -58,8 +58,9 @@
                 $excursion->setDescripcion($data->descripcion);
                 $excursion->setFecha($data->fecha);
                 $excursion->setPrecio($data->precio);
-                $excursion->setEstado($data->estado);
-                $excursion->setLugar($data->lugar);
+                $estado = filter_var($data->estado, FILTER_VALIDATE_BOOLEAN);
+                $excursion->setEstado($estado);
+                            $excursion->setLugar($data->lugar);
                 $excursion->setCantidad($data->cantidad);
     
                 $excursionBusiness = new ExcursionBusiness();
