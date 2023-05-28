@@ -98,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/Agregar');
+          Navigator.pushReplacementNamed(context, '/Agregar');
         },
         tooltip: 'Agregar',
         child: const Icon(Icons.add),

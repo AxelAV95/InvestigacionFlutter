@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../services/api_service.dart';
+import 'home_page.dart';
 
 class CreateExcursionPage extends StatefulWidget {
   const CreateExcursionPage({Key? key}) : super(key: key);
@@ -70,6 +70,12 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                     int.parse(_cantidadController.text),
                   );
                   _limpiarCampos();
+                 Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Excursion App',)),
+                      ModalRoute.withName('/'),
+                    );
+                //  Navigator.pop(context); // Return to the previous view
                 }
               },
               child: Text('Agregar'),
@@ -198,4 +204,6 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
     final numericRegex = RegExp(r'^-?(([0-9]*)|(([0-9]*)\.([0-9]*)))$');
     return numericRegex.hasMatch(value);
   }
+  
+ 
 }
