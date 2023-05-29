@@ -18,6 +18,7 @@ class _ActualizarExcursionViewState extends State<ActualizarExcursionView> {
   TextEditingController _estadoController = TextEditingController();
   TextEditingController _lugarController = TextEditingController();
   TextEditingController _cantidadController = TextEditingController();
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -31,6 +32,22 @@ class _ActualizarExcursionViewState extends State<ActualizarExcursionView> {
     _cantidadController.text = widget.excursion.cantidad.toString();
   }
 
+  Future<void> selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        _fechaController.text =
+            '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,130 +56,168 @@ class _ActualizarExcursionViewState extends State<ActualizarExcursionView> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Card(
-          color: Color(0xFFE0FF85),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _descripcionController,
-                decoration: InputDecoration(
-                  labelText: 'Descripción',
+        child: Column(
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Actualizar Excursión',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                keyboardType: TextInputType.text,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa una descripción válida';
-                  }
-                  if (_containsNumeric(value)) {
-                    return 'Por favor, ingresa solo texto';
-                  }
-                  return null;
-                },
               ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _fechaController,
-                decoration: InputDecoration(
-                  labelText: 'Fecha',
-                ),
-                enabled: false,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _precioController,
-                decoration: InputDecoration(
-                  labelText: 'Precio',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa un precio válido';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Por favor, ingresa un número válido';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _estadoController,
-                decoration: InputDecoration(
-                  labelText: 'Estado',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa un estado válido';
-                  }
-                  if (int.tryParse(value) == null) {
-                    return 'Por favor, ingresa un número válido';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _lugarController,
-                decoration: InputDecoration(
-                  labelText: 'Lugar',
-                ),
-                keyboardType: TextInputType.text,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa un lugar válido';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _cantidadController,
-                decoration: InputDecoration(
-                  labelText: 'Cantidad',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, ingresa una cantidad válida';
-                  }
-                  if (int.tryParse(value) == null) {
-                    return 'Por favor, ingresa un número válido';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  if (_validateForm()) {
-                    final String nuevaDescripcion = _descripcionController.text;
-                    final String nuevaFecha = _fechaController.text;
-                    final double nuevoPrecio = double.parse(_precioController.text);
-                    final int nuevoEstado = int.parse(_estadoController.text);
-                    final String nuevoLugar = _lugarController.text;
-                    final int nuevaCantidad = int.parse(_cantidadController.text);
+            ),
+            SizedBox(height: 16),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Card(
+                  color: Color(0xFFE0FF85),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        TextFormField(
+                          controller: _descripcionController,
+                          decoration: InputDecoration(
+                            labelText: 'Descripción',
+                          ),
+                          keyboardType: TextInputType.text,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, ingresa una descripción válida';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        GestureDetector(
+                          onTap: selectDate,
+                          child: AbsorbPointer(
+                            child: TextFormField(
+                              controller: _fechaController,
+                              decoration: InputDecoration(
+                                labelText: 'Fecha',
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        TextFormField(
+                          controller: _precioController,
+                          decoration: InputDecoration(
+                            labelText: 'Precio',
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, ingresa un precio válido';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Por favor, ingresa un número válido';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        TextFormField(
+                          controller: _estadoController,
+                          decoration: InputDecoration(
+                            labelText: 'Estado',
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, ingresa un estado válido';
+                            }
+                            if (int.tryParse(value) == null) {
+                              return 'Por favor, ingresa un número válido';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        TextFormField(
+                          controller: _lugarController,
+                          decoration: InputDecoration(
+                            labelText: 'Lugar',
+                          ),
+                          keyboardType: TextInputType.text,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, ingresa un lugar válido';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        TextFormField(
+                          controller: _cantidadController,
+                          decoration: InputDecoration(
+                            labelText: 'Cantidad',
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, ingresa una cantidad válida';
+                            }
+                            if (int.tryParse(value) == null) {
+                              return 'Por favor, ingresa un número válido';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_validateForm()) {
+                              final String nuevaDescripcion = _descripcionController.text;
+                              final double nuevoPrecio = double.parse(_precioController.text);
+                              final int nuevoEstado = int.parse(_estadoController.text);
+                              final String nuevoLugar = _lugarController.text;
+                              final int nuevaCantidad = int.parse(_cantidadController.text);
 
-                    Excursion excursionActualizada = Excursion(
-                      id: widget.excursion.id,
-                      descripcion: nuevaDescripcion,
-                      fecha: DateTime.parse(nuevaFecha),
-                      precio: nuevoPrecio,
-                      estado: nuevoEstado,
-                      lugar: nuevoLugar,
-                      cantidad: nuevaCantidad,
-                    );
+                              Excursion excursionActualizada = Excursion(
+                                id: widget.excursion.id,
+                                descripcion: nuevaDescripcion,
+                                fecha: _selectedDate,
+                                precio: nuevoPrecio,
+                                estado: nuevoEstado,
+                                lugar: nuevoLugar,
+                                cantidad: nuevaCantidad,
+                              );
 
-                    Navigator.pop(context, excursionActualizada);
-                  }
-                },
-                child: Text('Guardar'),
+                              Navigator.pop(context, excursionActualizada);
+
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Éxito'),
+                                    content: Text('La excursión se ha actualizado correctamente.'),
+                                    actions: <Widget>[
+                                      ElevatedButton(
+                                        child: Text('Aceptar'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          },
+                          child: Text('Guardar'),
+                        ),
+                        SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              SizedBox(height: 16),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -275,10 +330,5 @@ class _ActualizarExcursionViewState extends State<ActualizarExcursionView> {
     }
 
     return true;
-  }
-
-  bool _containsNumeric(String value) {
-    final numericRegex = RegExp(r'^[0-9]+$');
-    return numericRegex.hasMatch(value);
   }
 }
