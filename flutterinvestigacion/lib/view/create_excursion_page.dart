@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'home_page.dart';
-
 class CreateExcursionPage extends StatefulWidget {
   const CreateExcursionPage({Key? key}) : super(key: key);
 
@@ -46,152 +45,173 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Excursiones',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        title: Center(
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Crear Excursión',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  _apiService.insertarExcursion(
-                    context,
-                    _descripcionController.text,
-                    _fecha!,
-                    double.parse(_precioController.text),
-                    _estado,
-                    _lugarController.text,
-                    int.parse(_cantidadController.text),
-                  );
-                  _limpiarCampos();
-                 Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Excursion App',)),
-                      ModalRoute.withName('/'),
-                    );
-                //  Navigator.pop(context); // Return to the previous view
-                }
-              },
-              child: Text('Agregar'),
-            ),
-          ],
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyHomePage(title: 'Excursion App')), // Reemplaza MyHomePage con el nombre correcto de tu página de inicio
+            );
+          },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextFormField(
-                    controller: _descripcionController,
-                    decoration: InputDecoration(labelText: 'Descripción'),
-                    keyboardType: TextInputType.text,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, ingresa una descripción válida';
-                      }
-                      if (_containsNumeric(value)) {
-                        return 'Por favor, ingresa solo texto';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final selectedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (selectedDate != null) {
-                        setState(() {
-                          _fecha = selectedDate;
-                        });
-                      }
-                    },
-                    child: Text(
-                      _fecha != null
-                          ? 'Fecha: ${_fecha!.toString().substring(0, 10)}'
-                          : 'Seleccionar fecha',
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            color: Color(0xFFE0FF85), // Cambia el color del card a E0FF85
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextFormField(
+                      controller: _descripcionController,
+                      decoration: InputDecoration(labelText: 'Descripción'),
+                      keyboardType: TextInputType.text,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingresa una descripción válida';
+                        }
+                        if (_containsNumeric(value)) {
+                          return 'Por favor, ingresa solo texto';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    controller: _precioController,
-                    decoration: InputDecoration(labelText: 'Precio'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, ingresa un precio válido';
-                      }
-                      if (double.tryParse(value) == null) {
-                        return 'Por favor, ingresa un número válido';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _estado,
-                        onChanged: (value) {
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final selectedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (selectedDate != null) {
                           setState(() {
-                            _estado = value!;
+                            _fecha = selectedDate;
                           });
-                        },
+                        }
+                      },
+                      child: Text(
+                        _fecha != null
+                            ? 'Fecha: ${_fecha!.toString().substring(0, 10)}'
+                            : 'Seleccionar fecha',
                       ),
-                      Text('Estado'),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    controller: _lugarController,
-                    decoration: InputDecoration(labelText: 'Lugar'),
-                    keyboardType: TextInputType.text,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, ingresa un lugar válido';
-                      }
-                      if (_containsNumeric(value)) {
-                        return 'Por favor, ingresa solo texto';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    controller: _cantidadController,
-                    decoration: InputDecoration(labelText: 'Cantidad'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, ingresa una cantidad válida';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'Por favor, ingresa un número válido';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
+                    ),
+                    SizedBox(height: 16),
+                    TextFormField(
+                      controller: _precioController,
+                      decoration: InputDecoration(labelText: 'Precio'),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingresa un precio válido';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Por favor, ingresa un número válido';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _estado,
+                          onChanged: (value) {
+                            setState(() {
+                              _estado = value!;
+                            });
+                          },
+                        ),
+                        Text('Estado'),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    TextFormField(
+                      controller: _lugarController,
+                      decoration: InputDecoration(labelText: 'Lugar'),
+                      keyboardType: TextInputType.text,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingresa un lugar válido';
+                        }
+                        if (_containsNumeric(value)) {
+                          return 'Por favor, ingresa solo texto';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    TextFormField(
+                      controller: _cantidadController,
+                      decoration: InputDecoration(labelText: 'Cantidad'),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingresa una cantidad válida';
+                        }
+                        if (int.tryParse(value) == null) {
+                          return 'Por favor, ingresa un número válido';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.center,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            _apiService.insertarExcursion(
+                              context,
+                              _descripcionController.text,
+                              _fecha!,
+                              double.parse(_precioController.text),
+                              _estado,
+                              _lugarController.text,
+                              int.parse(_cantidadController.text),
+                            );
+                            _limpiarCampos();
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => MyHomePage(title: 'Excursion App')), // Reemplaza MyHomePage con el nombre correcto de tu página de inicio
+                              ModalRoute.withName('/'),
+                            );
+                          }
+                        },
+                        child: Text('Agregar'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -204,6 +224,4 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
     final numericRegex = RegExp(r'^-?(([0-9]*)|(([0-9]*)\.([0-9]*)))$');
     return numericRegex.hasMatch(value);
   }
-  
- 
 }
