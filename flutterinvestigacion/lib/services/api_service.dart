@@ -36,6 +36,48 @@ class ApiService {
     }
     return excursionesData;
   }
+
+  Future<void> modificarExcursion(BuildContext context, Excursion e) async{
+    try{
+       String fechaFormateada = DateFormat('yyyy-MM-dd').format(e.fecha);
+          var data = {
+          'id': e.id,
+          'descripcion': e.descripcion,
+          'fecha': fechaFormateada,
+          'precio': e.precio,
+          'estado': e.estado,
+          'lugar': e.lugar,
+          'cantidad': e.cantidad,
+        };
+
+         var res = await http.put(Uri.parse(apiUrl), body:json.encode(data));
+
+         var resultado = jsonDecode(res.body);
+
+          if (resultado['statusCode'] == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Actualizado con éxito'),
+
+            ),
+          );
+         
+         
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al actualizar'),
+            ),
+          );
+        }
+
+         //print(resultado);
+
+      //print(data);
+    }catch(e){
+      print(e);
+    }
+  }
 Future<void> insertarExcursion(
   BuildContext context,
   String descripcion,
@@ -133,6 +175,8 @@ print('cantidad : $cantidad');
       print(e);
     }
   }
+
+  
   
 
 }

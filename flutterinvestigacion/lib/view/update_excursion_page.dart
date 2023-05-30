@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../domain/excursion.dart';
+import 'package:intl/intl.dart';
+
 import 'home_page.dart';
 class ActualizarExcursionView extends StatefulWidget {
   final Excursion excursion;
@@ -18,7 +20,15 @@ class _ActualizarExcursionViewState extends State<ActualizarExcursionView> {
   TextEditingController _estadoController = TextEditingController();
   TextEditingController _lugarController = TextEditingController();
   TextEditingController _cantidadController = TextEditingController();
+    final ApiService _apiService = ApiService();
 
+
+    void _navigateToHomePage(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => MyHomePage(title: 'Excursion App',)),
+    );
+  }
   @override
   void initState() {
     super.initState();
@@ -138,6 +148,7 @@ class _ActualizarExcursionViewState extends State<ActualizarExcursionView> {
               ElevatedButton(
                 onPressed: () {
                   if (_validateForm()) {
+                    
                     final String nuevaDescripcion = _descripcionController.text;
                     final String nuevaFecha = _fechaController.text;
                     final double nuevoPrecio = double.parse(_precioController.text);
@@ -145,17 +156,23 @@ class _ActualizarExcursionViewState extends State<ActualizarExcursionView> {
                     final String nuevoLugar = _lugarController.text;
                     final int nuevaCantidad = int.parse(_cantidadController.text);
 
+                    DateTime originalDate = DateFormat("dd-MM-yyyy").parse(nuevaFecha.replaceAll("/", "-"));
+                    String formattedDateString = DateFormat("yyyy-MM-dd").format(originalDate);
+
                     Excursion excursionActualizada = Excursion(
                       id: widget.excursion.id,
                       descripcion: nuevaDescripcion,
-                      fecha: DateTime.parse(nuevaFecha),
+                      fecha: DateTime.parse(formattedDateString),
                       precio: nuevoPrecio,
                       estado: nuevoEstado,
                       lugar: nuevoLugar,
                       cantidad: nuevaCantidad,
                     );
 
-                    Navigator.pop(context, excursionActualizada);
+                    
+                    _apiService.modificarExcursion(context, excursionActualizada);
+                    _navigateToHomePage(context);
+                  //  Navigator.pop(context, excursionActualizada);
                   }
                 },
                 child: Text('Guardar'),
