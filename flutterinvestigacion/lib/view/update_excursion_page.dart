@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../domain/excursion.dart';
 import 'home_page.dart';
+import 'package:intl/intl.dart';
+import 'package:flutterinvestigacion/utils/utils.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+
 class ActualizarExcursionView extends StatefulWidget {
   final Excursion excursion;
 
@@ -12,17 +18,18 @@ class ActualizarExcursionView extends StatefulWidget {
 }
 
 class _ActualizarExcursionViewState extends State<ActualizarExcursionView> {
-  TextEditingController _descripcionController = TextEditingController();
-  TextEditingController _fechaController = TextEditingController();
-  TextEditingController _precioController = TextEditingController();
-  TextEditingController _estadoController = TextEditingController();
-  TextEditingController _lugarController = TextEditingController();
-  TextEditingController _cantidadController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
+  final TextEditingController _idController = TextEditingController();
+  final TextEditingController _descripcionController = TextEditingController();
+  final TextEditingController _fechaController = TextEditingController();
+  final TextEditingController _precioController = TextEditingController();
+  final TextEditingController _estadoController = TextEditingController();
+  final TextEditingController _lugarController = TextEditingController();
+  final TextEditingController _cantidadController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _idController.text = widget.excursion.id.toString();
     _descripcionController.text = widget.excursion.descripcion;
     _fechaController.text =
         '${widget.excursion.fecha.day.toString().padLeft(2, '0')}/${widget.excursion.fecha.month.toString().padLeft(2, '0')}/${widget.excursion.fecha.year}';
@@ -32,19 +39,46 @@ class _ActualizarExcursionViewState extends State<ActualizarExcursionView> {
     _cantidadController.text = widget.excursion.cantidad.toString();
   }
 
-  Future<void> selectDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        _fechaController.text =
-            '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}';
-      });
+  Future<void> modificarExcursion() async {
+    try {
+      final int idExcursion = int.parse(_idController.text);
+      final String nuevaDescripcion = _descripcionController.text;
+      final DateTime nuevaFecha =
+          DateFormat('dd/MM/yyyy').parse(_fechaController.text);
+      final double nuevoPrecio = double.parse(_precioController.text);
+      final int nuevoEstado = int.parse(_estadoController.text);
+      final String nuevoLugar = _lugarController.text;
+      final int nuevaCantidad = int.parse(_cantidadController.text);
+
+      var data = {
+        'id': idExcursion.toString(),
+        'descripcion': nuevaDescripcion,
+        'fecha': nuevaFecha.toString(),
+        'precio': nuevoPrecio.toString(),
+        'estado': nuevoEstado.toString(),
+        'lugar': nuevoLugar,
+        'cantidad': nuevaCantidad.toString(),
+      };
+
+      var res = await http.put(Uri.parse(apiUrl), body: json.encode(data));
+      var resultado = jsonDecode(res.body);
+
+      if (resultado['statusCode'] == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Actualizado con éxito'),
+          ),
+        );
+        setState(() {});
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al actualizar'),
+          ),
+        );
+      }
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -58,277 +92,59 @@ class _ActualizarExcursionViewState extends State<ActualizarExcursionView> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'Actualizar Excursión',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
+            TextField(
+              controller: _descripcionController,
+              decoration: InputDecoration(
+                labelText: 'Descripción',
+              ),
+            ),
+            TextField(
+              controller: _fechaController,
+              decoration: InputDecoration(
+                labelText: 'Fecha',
+              ),
+            ),
+            TextField(
+              controller: _precioController,
+              decoration: InputDecoration(
+                labelText: 'Precio',
+              ),
+            ),
+            TextField(
+              controller: _estadoController,
+              decoration: InputDecoration(
+                labelText: 'Estado',
+              ),
+            ),
+            TextField(
+              controller: _lugarController,
+              decoration: InputDecoration(
+                labelText: 'Lugar',
+              ),
+            ),
+            TextField(
+              controller: _cantidadController,
+              decoration: InputDecoration(
+                labelText: 'Cantidad',
               ),
             ),
             SizedBox(height: 16),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Card(
-                  color: Color(0xFFE0FF85),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        TextFormField(
-                          controller: _descripcionController,
-                          decoration: InputDecoration(
-                            labelText: 'Descripción',
-                          ),
-                          keyboardType: TextInputType.text,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, ingresa una descripción válida';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: selectDate,
-                          child: AbsorbPointer(
-                            child: TextFormField(
-                              controller: _fechaController,
-                              decoration: InputDecoration(
-                                labelText: 'Fecha',
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        TextFormField(
-                          controller: _precioController,
-                          decoration: InputDecoration(
-                            labelText: 'Precio',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, ingresa un precio válido';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Por favor, ingresa un número válido';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 16),
-                        TextFormField(
-                          controller: _estadoController,
-                          decoration: InputDecoration(
-                            labelText: 'Estado',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, ingresa un estado válido';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Por favor, ingresa un número válido';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 16),
-                        TextFormField(
-                          controller: _lugarController,
-                          decoration: InputDecoration(
-                            labelText: 'Lugar',
-                          ),
-                          keyboardType: TextInputType.text,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, ingresa un lugar válido';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 16),
-                        TextFormField(
-                          controller: _cantidadController,
-                          decoration: InputDecoration(
-                            labelText: 'Cantidad',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, ingresa una cantidad válida';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Por favor, ingresa un número válido';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (_validateForm()) {
-                              final String nuevaDescripcion = _descripcionController.text;
-                              final double nuevoPrecio = double.parse(_precioController.text);
-                              final int nuevoEstado = int.parse(_estadoController.text);
-                              final String nuevoLugar = _lugarController.text;
-                              final int nuevaCantidad = int.parse(_cantidadController.text);
-
-                              Excursion excursionActualizada = Excursion(
-                                id: widget.excursion.id,
-                                descripcion: nuevaDescripcion,
-                                fecha: _selectedDate,
-                                precio: nuevoPrecio,
-                                estado: nuevoEstado,
-                                lugar: nuevoLugar,
-                                cantidad: nuevaCantidad,
-                              );
-
-                              Navigator.pop(context, excursionActualizada);
-
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Éxito'),
-                                    content: Text('La excursión se ha actualizado correctamente.'),
-                                    actions: <Widget>[
-                                      ElevatedButton(
-                                        child: Text('Aceptar'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            }
-                          },
-                          child: Text('Guardar'),
-                        ),
-                        SizedBox(height: 16),
-                      ],
-                    ),
+            ElevatedButton(
+              onPressed: () {
+                modificarExcursion(); // Llamada al método modificarExcursion
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MyHomePage(title: 'Excursion App'),
                   ),
-                ),
-              ),
+                  ModalRoute.withName('/'),
+                );
+              },
+              child: Text('Guardar'),
             ),
           ],
         ),
       ),
     );
-  }
-
-  bool _validateForm() {
-    if (_descripcionController.text.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Por favor, ingresa una descripción válida'),
-            actions: <Widget>[
-              ElevatedButton(
-                child: Text('Aceptar'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      return false;
-    }
-
-    if (_precioController.text.isEmpty || double.tryParse(_precioController.text) == null) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Por favor, ingresa un precio válido'),
-            actions: <Widget>[
-              ElevatedButton(
-                child: Text('Aceptar'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      return false;
-    }
-
-    if (_estadoController.text.isEmpty || int.tryParse(_estadoController.text) == null) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Por favor, ingresa un estado válido'),
-            actions: <Widget>[
-              ElevatedButton(
-                child: Text('Aceptar'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      return false;
-    }
-
-    if (_lugarController.text.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Por favor, ingresa un lugar válido'),
-            actions: <Widget>[
-              ElevatedButton(
-                child: Text('Aceptar'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      return false;
-    }
-
-    if (_cantidadController.text.isEmpty || int.tryParse(_cantidadController.text) == null) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Por favor, ingresa una cantidad válida'),
-            actions: <Widget>[
-              ElevatedButton(
-                child: Text('Aceptar'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      return false;
-    }
-
-    return true;
   }
 }
