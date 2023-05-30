@@ -20,6 +20,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
   bool _estado = true;
 
   final ApiService _apiService = ApiService();
+  String? _fechaError;
 
   @override
   void dispose() {
@@ -38,6 +39,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
     setState(() {
       _fecha = null;
       _estado = true;
+      _fechaError = null;
     });
   }
 
@@ -115,6 +117,7 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                         if (selectedDate != null) {
                           setState(() {
                             _fecha = selectedDate;
+                            _fechaError = null; // Reiniciar el mensaje de error de fecha
                           });
                         }
                       },
@@ -124,6 +127,15 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                             : 'Seleccionar fecha',
                       ),
                     ),
+                    if (_fechaError != null) ...[
+                      SizedBox(height: 8),
+                      Text(
+                        _fechaError!,
+                        style: TextStyle(
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
                     SizedBox(height: 16),
                     TextFormField(
                       controller: _precioController,
@@ -190,21 +202,29 @@ class _CreateExcursionPageState extends State<CreateExcursionPage> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
-                            _apiService.insertarExcursion(
-                              context,
-                              _descripcionController.text,
-                              _fecha!,
-                              double.parse(_precioController.text),
-                              _estado,
-                              _lugarController.text,
-                              int.parse(_cantidadController.text),
-                            );
-                            _limpiarCampos();
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(builder: (context) => MyHomePage(title: 'Excursion App')), // Reemplaza MyHomePage con el nombre correcto de tu página de inicio
-                              ModalRoute.withName('/'),
-                            );
+                            if (_fecha == null) {
+                              setState(() {
+                                _fechaError = 'Por favor, selecciona una fecha';
+                              });
+                            } else {
+                              _apiService.insertarExcursion(
+                                context,
+                                _descripcionController.text,
+                                _fecha!,
+                                double.parse(_precioController.text),
+                                _estado,
+                                _lugarController.text,
+                                int.parse(_cantidadController.text),
+                              );
+                              _limpiarCampos();
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Se creó una nueva excursión'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            }
                           }
                         },
                         child: Text('Agregar'),
